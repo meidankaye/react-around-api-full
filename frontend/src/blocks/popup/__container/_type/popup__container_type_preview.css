@@ -1,0 +1,9 @@
+.popup__container_type_preview {
+    flex-direction: column;
+    background: transparent;
+    box-shadow: none;
+    max-width: 75vw;
+    max-height: 75vh;
+    width: auto;
+    height: auto;
+}
