@@ -1,0 +1,16 @@
+.places {
+    display: grid;
+    margin: 50px 0 0;
+    grid-template-columns: repeat(auto-fit, 282px);
+    grid-template-rows: repeat(auto-fit, 361px);
+    gap: 20px 17px;
+}
+
+@media screen and (max-width: 1279px) {
+    .places {
+        margin: 0 19px 50px;
+        grid-template-columns: 282px;
+        grid-template-rows: 361px;
+        gap: 20px 0;
+    }
+}
