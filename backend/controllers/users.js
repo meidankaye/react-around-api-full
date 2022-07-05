@@ -1,81 +1,115 @@
-// const ValidationError = require('../utils/validationerror');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const ValidationError = require('../utils/validationerror');
+const ConflictError = require('../utils/conflicterror');
+const NotFoundError = require('../utils/notfounderror');
+const AuthorizationError = require('../utils/autherror');
 const User = require('../models/user');
 
-const getUsers = (req, res) => {
+const { JWT_SECRET, NODE_ENV } = process.env;
+
+const getUsers = (req, res, next) => {
   User.find({})
+    .orFail(() => {
+      throw new NotFoundError('User list is empty.');
+    })
     .then((users) => res.send(users))
-    .catch(() => res.status(500).send({ message: 'An error has occurred on the server' }),
-    );
+    .catch(next);
 };
 
-const getUserById = (req, res) => {
-  User.findById(req.params.userId)
+const getCurrentUser = (req, res, next) => {
+  User.findById(req.user._id)
     .orFail(() => {
-      const error = new Error('No user found with that id');
-      error.statusCode = 404;
-      throw error;
+      throw new NotFoundError('User id not found.');
+    })
+    .then((currentUser) => {
+      res.send(currentUser);
+    })
+    .catch(next);
+};
+
+const getUserById = (req, res, next) => {
+  User.findById(req.params.id)
+    .orFail(() => {
+      throw new NotFoundError('User id not found.');
     })
     .then((user) => res.send(user))
-    .catch((error) => {
-      if (error.name === 'CastError') {
-        res.status(400).send({ message: 'NotValid Data' });
-      }
-      if (error.name === 'DocumentNotFoundError') {
-        res.status(404).send({ message: 'User not found' });
-      } else {
-        res
-          .status(500)
-          .send({ message: 'An error has occurred on the server' });
-      }
-    });
+    .catch(next);
 };
 
-const createUser = (req, res) => {
-  // const {
-  //   name,
-  //   about,
-  //   avatar,
-  //   email,
-  //   password,
-  // } = req.body;
-  // if (!password) throw new ValidationError()
-  User.create(req.body)
-    .then((newUser) => res.send(newUser))
-    .catch((error) => {
-      if (error.name === 'ValidationError') {
-        res.status(400).send(error);
-      } else {
-        res
-          .status(500)
-          .send({ message: 'An error has occurred on the server' });
-      }
-    });
+const login = (req, res, next) => {
+  const { email, password } = req.body;
+  User.findOne({ email })
+    .select('+password')
+    .orFail(() => new AuthorizationError('Incorrect email or password.'))
+    .then((user) => {
+      bcrypt.compare(password, user.password).then((match) => {
+        if (!match) {
+          throw new AuthorizationError('Incorrect email or password.');
+        }
+        const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret', { expiresIn: '7d' });
+        res.send({ token });
+      });
+    })
+    .catch(next);
 };
 
-const updateUserProfile = (req, res) => {
+const createUser = (req, res, next) => {
+  const {
+    name,
+    about,
+    avatar,
+    email,
+    password,
+  } = req.body;
+  if (!password) throw new ValidationError('Missing Password.');
+  bcrypt.hash(password, 10).then((hash) => {
+    User.create({
+      name,
+      about,
+      avatar,
+      email,
+      password: hash,
+    })
+      .then((newUser) => res.send(newUser))
+      .catch((error) => {
+        if (error.name === 'ConflictError') {
+          next(new ConflictError('User already exists.'));
+        } else next(error);
+      });
+  });
+};
+
+const updateUserProfile = (req, res, next) => {
   User.findByIdAndUpdate(
     req.user._id,
     { name: req.body.name, about: req.body.about },
     { new: true, runValidators: true },
   )
+    .orFail(() => {
+      throw new NotFoundError('User id not found.');
+    })
     .then((newData) => res.send(newData))
-    .catch(() => res.status(500).send({ message: 'An error has occurred on the server' }),
-    );
+    .catch(next);
 };
 
-const updateUserAvatar = (req, res) => {
+const updateUserAvatar = (req, res, next) => {
   User.findByIdAndUpdate(req.user._id,
     { avatar: req.body.avatar },
     { new: true, runValidators: true },
   )
+    .orFail(() => {
+      throw new NotFoundError('User id not found.');
+    })
     .then((newAvatar) => res.send(newAvatar))
-    .catch(() => res.status(500).send({ message: 'An error has occurred on the server' }),
-    );
+    .catch(next);
 };
 
 module.exports = {
   getUsers,
+  getCurrentUser,
   getUserById,
+  login,
   createUser,
   updateUserProfile,
   updateUserAvatar,
