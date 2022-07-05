@@ -1,3 +1,4 @@
+// const ValidationError = require('../utils/validationerror');
 const User = require('../models/user');
 
 const getUsers = (req, res) => {
@@ -30,6 +31,14 @@ const getUserById = (req, res) => {
 };
 
 const createUser = (req, res) => {
+  // const {
+  //   name,
+  //   about,
+  //   avatar,
+  //   email,
+  //   password,
+  // } = req.body;
+  // if (!password) throw new ValidationError()
   User.create(req.body)
     .then((newUser) => res.send(newUser))
     .catch((error) => {

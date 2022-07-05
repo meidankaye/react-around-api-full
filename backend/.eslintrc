@@ -9,6 +9,7 @@
     "eol-last": "off",
     "no-trailing-spaces": "off",
     "max-len": "off",
-    "function-paren-newline": "off"
+    "function-paren-newline": "off",
+    "no-unused-vars": ["error", { "argsIgnorePattern": "next" }]
   }
 }
