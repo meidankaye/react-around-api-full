@@ -5,6 +5,7 @@ const { FORBIDDEN } = require('../utils/httpstatuscodes');
 const { JWT_SECRET, NODE_ENV } = process.env;
 
 module.exports = (req, res, next) => {
+  console.log('Hello');
   const { authorization } = req.headers;
   if (!authorization || !authorization.startsWith('Bearer ')) {
     next(new AuthorizationError('No token provided.', FORBIDDEN));

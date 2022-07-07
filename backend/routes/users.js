@@ -65,10 +65,14 @@ router.patch(
   }),
   updateUserProfile,
 );
-router.patch('/users/me/avatar', celebrate({
-  body: Joi.object().keys({
-    avatar: Joi.string().custom(validateUrl),
+router.patch(
+  '/users/me/avatar',
+  celebrate({
+    body: Joi.object().keys({
+      avatar: Joi.string().custom(validateUrl),
+    }),
   }),
-}), updateUserAvatar);
+  updateUserAvatar,
+);
 
 module.exports = router;

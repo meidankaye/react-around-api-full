@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
 
-mongoose.connect('mongodb://0.0.0.0:27017/aroundb');
+mongoose.connect('mongodb://localhost:27017/aroundb');
 
 app.use(express.json());
 

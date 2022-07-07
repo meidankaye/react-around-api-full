@@ -81,15 +81,17 @@ const createUser = (req, res, next) => {
 };
 
 const updateUserProfile = (req, res, next) => {
+  console.log('Anything');
+  const { name, about } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
-    { name: req.body.name, about: req.body.about },
+    { name, about },
     { new: true, runValidators: true },
   )
     .orFail(() => {
       throw new NotFoundError('User id not found.');
     })
-    .then((newData) => res.send(newData))
+    .then((user) => res.send(user))
     .catch(next);
 };
 
