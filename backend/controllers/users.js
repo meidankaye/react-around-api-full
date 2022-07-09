@@ -81,7 +81,6 @@ const createUser = (req, res, next) => {
 };
 
 const updateUserProfile = (req, res, next) => {
-  console.log('Anything');
   const { name, about } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
@@ -96,8 +95,9 @@ const updateUserProfile = (req, res, next) => {
 };
 
 const updateUserAvatar = (req, res, next) => {
+  const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id,
-    { avatar: req.body.avatar },
+    { avatar },
     { new: true, runValidators: true },
   )
     .orFail(() => {

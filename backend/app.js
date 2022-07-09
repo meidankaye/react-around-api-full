@@ -1,3 +1,4 @@
+const cors = require('cors');
 const express = require('express');
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -7,6 +8,8 @@ const cardsRouter = require('./routes/cards');
 
 mongoose.connect('mongodb://localhost:27017/aroundb');
 
+app.use(cors());
+app.options('*', cors());
 app.use(express.json());
 
 app.use('/', usersRouter);

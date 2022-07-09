@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const urlValidator = require('../utils/url-validator');
+const user = require('./user');
 
 const cardSchema = new mongoose.Schema({
   name: {
@@ -9,16 +11,16 @@ const cardSchema = new mongoose.Schema({
   },
   link: {
     type: String,
-    validate: {
-      validator(v) {
-        return /(https?:\/\/)(www\.)?[-A-Za-z0-9+&@#/%?=~_|!:,.;]+\.*[.\-A-Za-z0-9+&@#/%=~_|?#]/gm.test(v);
-      },
-    },
     required: true,
+    validate: {
+      validator: urlValidator,
+      message: 'Invalid URL in card image.',
+    },
   },
   owner: {
     type: mongoose.SchemaTypes.ObjectId,
     required: true,
+    ref: user,
   },
   likes: {
     type: [

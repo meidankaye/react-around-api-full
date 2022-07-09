@@ -1,101 +1,61 @@
 const mongoose = require('mongoose');
 const Card = require('../models/card');
+const NotFoundError = require('../utils/notfounderror');
+const AuthorizationError = require('../utils/autherror');
 
-const getCards = (req, res) => {
+const getCards = (req, res, next) => {
   Card.find({})
     .orFail(() => {
-      const error = new Error('No card found with that id');
-      error.statusCode = 404;
-      throw error;
+      throw new NotFoundError('Card list is empty.');
     })
     .then((cards) => res.send(cards))
-    .catch((error) => {
-      if (error.name === 'CastError') {
-        res.status(400).send({ message: 'NotValid Data' });
-      }
-      if (error.name === 'DocumentNotFoundError') {
-        res.status(404).send({ message: 'Card not found' });
-      } else {
-        res
-          .status(500)
-          .send({ message: 'An error has occurred on the server' });
-      }
-    });
+    .catch(next);
 };
 
-const createCard = (req, res) => {
-  Card.create(req.body)
+const createCard = (req, res, next) => {
+  const { name, link } = req.body;
+  Card.create({ name, link, owner: req.user._id })
     .then((newCard) => res.send(newCard))
-    .catch((error) => {
-      if (error.name === 'ValidationError') {
-        res.status(400).send(error);
-      } else {
-        res
-          .status(500)
-          .send({ message: 'An error has occurred on the server' });
-      }
-    });
+    .catch(next);
 };
 
-const deleteCard = (req, res) => {
+const deleteCard = (req, res, next) => {
   Card.findByIdAndRemove(mongoose.Types.ObjectId(req.params.cardId))
     .orFail(() => {
-      const error = new Error('No card found with that id');
-      error.statusCode = 404;
-      throw error;
+      throw new NotFoundError('No card found with that id.');
     })
-    .then((card) => res.send(card))
-    .catch((error) => {
-      if (error.name === 'CastError') {
-        res.status(400).send({ message: 'NotValid Data' });
+    .then((card) => {
+      if (card.owner.equals(req.user._id)) res.send(card);
+      else {
+        throw new AuthorizationError(
+          'You may not delete cards that do not belong to you.',
+        );
       }
-      if (error.name === 'DocumentNotFoundError') {
-        res.status(404).send({ message: 'Card not found' });
-      } else {
-        res
-          .status(500)
-          .send({ message: 'An error has occurred on the server' });
-      }
-    });
+    })
+    .catch(next);
 };
 
-const likeCard = (req, res) => Card.findByIdAndUpdate(
+const likeCard = (req, res, next) => Card.findByIdAndUpdate(
   req.params.cardId,
   { $addToSet: { likes: req.user._id } },
   { new: true },
 )
+  .orFail(() => {
+    throw new NotFoundError('No card found with that id.');
+  })
   .then((card) => res.send(card))
-  .catch((error) => {
-    if (error.name === 'CastError') {
-      res.status(400).send({ message: 'NotValid Data' });
-    }
-    if (error.name === 'DocumentNotFoundError') {
-      res.status(404).send({ message: 'Card not found' });
-    } else {
-      res
-        .status(500)
-        .send({ message: 'An error has occurred on the server' });
-    }
-  });
+  .catch(next);
 
-const dislikeCard = (req, res) => Card.findByIdAndUpdate(
+const dislikeCard = (req, res, next) => Card.findByIdAndUpdate(
   req.params.cardId,
   { $pull: { likes: req.user._id } },
   { new: true },
 )
+  .orFail(() => {
+    throw new NotFoundError('No card found with that id.');
+  })
   .then((card) => res.send(card))
-  .catch((error) => {
-    if (error.name === 'CastError') {
-      res.status(400).send({ message: 'NotValid Data' });
-    }
-    if (error.name === 'DocumentNotFoundError') {
-      res.status(404).send({ message: 'Card not found' });
-    } else {
-      res
-        .status(500)
-        .send({ message: 'An error has occurred on the server' });
-    }
-  });
+  .catch(next);
 
 module.exports = {
   getCards,
