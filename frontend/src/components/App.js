@@ -145,7 +145,7 @@ function App() {
   function handleResgister({ email, password }) {
     register({ email, password })
       .then((user) => {
-        navigate("./signin");
+        navigate("/signin");
         setRegistered(true);
       })
       .catch((err) => {
