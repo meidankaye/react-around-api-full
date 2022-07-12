@@ -162,7 +162,7 @@ function App() {
     token &&
       validateToken(token)
         .then((res) => {
-          setValues(res.data.email);
+          setValues(res.email);
           setLoggedIn(true);
           navigate("/");
         })
