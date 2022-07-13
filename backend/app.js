@@ -4,10 +4,8 @@ const express = require('express');
 const { PORT = 3000 } = process.env;
 const app = express();
 const mongoose = require('mongoose');
-const { errors } = require('celebrate');
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
-const { requestLogger, errorLogger } = require('./middleware/logger');
 const NotFoundError = require('./utils/notfounderror');
 
 mongoose.connect('mongodb://localhost:27017/aroundb');
@@ -15,8 +13,6 @@ mongoose.connect('mongodb://localhost:27017/aroundb');
 app.use(cors());
 app.options('*', cors());
 app.use(express.json());
-app.use(requestLogger);
-app.use(errorLogger);
 
 app.use('/', usersRouter);
 app.use('/', cardsRouter);
@@ -24,8 +20,6 @@ app.use('/', cardsRouter);
 app.use('*', (req, res, next) => {
   next(new NotFoundError('Requested resourece was not found.'));
 });
-
-app.use(errors());
 
 app.listen(PORT, () => {
   console.log(`App listening at port ${PORT}`);
