@@ -73,7 +73,7 @@ const createUser = (req, res, next) => {
     })
       .then((newUser) => res.send(newUser))
       .catch((error) => {
-        if (error.name === 'ConflictError') {
+        if (error.code === 11000) {
           next(new ConflictError('User already exists.'));
         } else next(error);
       });
