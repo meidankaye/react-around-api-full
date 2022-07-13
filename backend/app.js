@@ -6,6 +6,7 @@ const app = express();
 const mongoose = require('mongoose');
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
+const { requestLogger, errorLogger } = require('./middleware/logger');
 const NotFoundError = require('./utils/notfounderror');
 
 mongoose.connect('mongodb://localhost:27017/aroundb');
@@ -13,6 +14,8 @@ mongoose.connect('mongodb://localhost:27017/aroundb');
 app.use(cors());
 app.options('*', cors());
 app.use(express.json());
+app.use(requestLogger);
+app.use(errorLogger);
 
 app.use('/', usersRouter);
 app.use('/', cardsRouter);
