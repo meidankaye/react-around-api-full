@@ -71,7 +71,13 @@ const createUser = (req, res, next) => {
       email,
       password: hash,
     })
-      .then((newUser) => res.send(newUser))
+      .then((newUser) => res.send({
+        _id: newUser._id,
+        email: newUser.email,
+        name: newUser.name,
+        about: newUser.about,
+        avatar: newUser.avatar,
+      }))
       .catch((error) => {
         if (error.code === 11000) {
           next(new ConflictError('User already exists.'));
