@@ -41,11 +41,11 @@ const login = (req, res, next) => {
   const { email, password } = req.body;
   User.findOne({ email })
     .select('+password')
-    .orFail(() => new AuthorizationError('Incorrect email or password.'))
+    .orFail(() => new AuthorizationError({ Message: 'Incorrect email or password.' }))
     .then((user) => {
       bcrypt.compare(password, user.password).then((match) => {
         if (!match) {
-          throw new AuthorizationError('Incorrect email or password.');
+          throw new AuthorizationError({ Message: 'Incorrect email or password.' });
         }
         const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret', { expiresIn: '7d' });
         res.send({ token });
