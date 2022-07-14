@@ -21,6 +21,14 @@ app.use('*', (req, res, next) => {
   next(new NotFoundError('Requested resourece was not found.'));
 });
 
+const serverErrorHandler = (err, req, res, next) => {
+  const { statusCode = 500, message } = err;
+  res.status(statusCode).send({
+    message: statusCode === 500 ? 'An error occurred on the server' : message,
+  });
+};
+app.use(serverErrorHandler);
+
 app.listen(PORT, () => {
   console.log(`App listening at port ${PORT}`);
 });
