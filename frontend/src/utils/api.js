@@ -68,7 +68,7 @@ class Api extends React.Component {
 }
 
 const api = new Api({
-  baseUrl: "https://api.around-project.students.nomoreparties.sbs",
+  baseUrl: "https://around-us-api.onrender.com",
   headers: {
     authorization: "439544b2-326e-4000-bd7d-7d8ec93af705",
     "Content-Type": "application/json",

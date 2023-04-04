@@ -1,4 +1,4 @@
-export const BASE_URL = "https://api.around-project.students.nomoreparties.sbs";
+export const BASE_URL = "https://around-us-api.onrender.com";
 
 const checkResponse = (res) =>
   res.ok ? res.json() : Promise.reject(`Error: ${res.status}`);
