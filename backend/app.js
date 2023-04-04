@@ -1,16 +1,21 @@
-require('dotenv').config();
+require('dotenv').config({ path: '/.env' });
 const cors = require('cors');
 const express = require('express');
-const { PORT = 3000 } = process.env;
-const app = express();
+const { PORT = 3000, NODE_ENV } = process.env;
 const mongoose = require('mongoose');
+const corsOptions = require('./config/corsOptions');
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
 const NotFoundError = require('./utils/notfounderror');
+const connectDB = require('./config/dbConn');
 
-mongoose.connect('mongodb://localhost:27017/aroundb');
+connectDB();
 
-app.use(cors());
+const app = express();
+
+mongoose.set('strictQuery', false);
+
+app.use(cors(corsOptions));
 app.options('*', cors());
 app.use(express.json());
 
@@ -29,6 +34,7 @@ const serverErrorHandler = (err, req, res, next) => {
 };
 app.use(serverErrorHandler);
 
-app.listen(PORT, () => {
-  console.log(`App listening at port ${PORT}`);
+mongoose.connection.once('open', () => {
+  console.log('Connected to MongoDB!');
+  if (NODE_ENV !== 'test') app.listen(PORT);
 });
